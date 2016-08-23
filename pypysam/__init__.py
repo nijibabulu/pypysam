@@ -18,13 +18,14 @@ class BufferedOSRead(object):
         self._next_chunk()
     def _next_chunk(self):
         self.chunk = os.read(self.fileno,self.buffer_size)
+        self.cur_buffer_size = len(self.chunk)
         self.buffer_pos = 0
     def tell(self):
         return self.pos
 
     def read(self):
         self.pos += 1
-        if self.buffer_pos == self.buffer_size:
+        if self.buffer_pos == self.cur_buffer_size:
             self._next_chunk()
             if not self.chunk:
                 return None
@@ -33,6 +34,7 @@ class BufferedOSRead(object):
 
     def seek(self,pos):
         os.lseek(self.fileno,pos,os.SEEK_SET)
+        self.buffer_pos = self.cur_buffer_size = 0
 
     def readline(self):
         s = ''
@@ -86,7 +88,7 @@ class FastaFile(object):
             c = self.f.read()
             if c == '>' or c == '':
                 break
-            if not c.isspace():
+            if c.isalpha():
                 ret_seq += c
             if end is not None and len(ret_seq) >= end-start:
                 break
@@ -115,7 +117,6 @@ class FastaFile(object):
         line_no = 0
         while True:
             c = self.br.read()
-            #c = self.f.read(1)
 
             if c == '\n': 
                 line_no += 1
@@ -131,7 +132,6 @@ class FastaFile(object):
                                          [s.name,s.length,s.tell,
                                           s.line_len,s.line_len+s.pad]])+'\n')
                 s = _FaState()
-                #s.name = self.f.readline().split()[0]
                 s.name = self.br.readline().split()[0]
                 line_no += 1
                 s.tell = self.br.tell()
