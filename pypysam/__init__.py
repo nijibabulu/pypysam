@@ -29,7 +29,7 @@ class BufferedOSRead(object):
         if self.buffer_pos == self.cur_buffer_size:
             self._next_chunk()
             if not self.chunk:
-                return None
+                return ''
         self.buffer_pos += 1
         return self.chunk[self.buffer_pos-1]
 
