@@ -242,13 +242,20 @@ class AlignedSegment(object):
         return start
 
 
+    # XXX: query_alignment_end should be based on getQueryEnd
+    # 
     @property
     def query_alignment_end(self):
         end = 0
         for op,length in self.cigar:
-            if _bam_cigar_type(op) & 1:
+            if _bam_cigar_type(op) & 2:
                 end += length
         return end
+
+    @property
+    def query_alignment_length(self):
+        return self.query_alignment_end-self.query_alignment_start
+
 
     @property
     def ref_alignment_end(self):
@@ -525,8 +532,9 @@ class BamFile(AlignmentFileBase):
                 value_block = tag_block[i+3:i+3+self._tag_sizes[val_type]]
             elif val_type == 'Z':
                 value_block = tag_block[i+3:].split('\x00')[0]
+                i += 1 # length of value_block will be -1 the actual block
             else:
-                raise ValueError, 'Tag type %s not supported' % tag.val_type
+                raise ValueError, 'Tag type %s not supported' % val_type
             i += 3+len(value_block)
             tags.append(SamTag(tag,val_type,value_block=value_block))
 

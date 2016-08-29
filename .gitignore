@@ -1,3 +1,6 @@
+# my tests which are too big for git
+test
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
