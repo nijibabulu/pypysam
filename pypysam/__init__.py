@@ -256,9 +256,12 @@ class AlignedSegment(object):
     def query_alignment_length(self):
         return self.query_alignment_end-self.query_alignment_start
 
+    @property
+    def reference_start(self):
+        return self.pos
 
     @property
-    def ref_alignment_end(self):
+    def reference_end(self):
         end = self.pos
         for op,length in self.cigar:
             if _bam_cigar_type(op) & 2:
@@ -267,7 +270,7 @@ class AlignedSegment(object):
 
     @property
     def aend(self):
-        return self.ref_alignment_end
+        return self.reference_end
 
     @property
     def query_alignment_sequence(self):
@@ -455,7 +458,7 @@ class BamFile(AlignmentFileBase):
                 'iiiiiiii',
                 aln.tid,
                 aln.pos,
-                reg2bin(aln.pos,aln.ref_alignment_end) << 16 | 
+                reg2bin(aln.pos,aln.reference_end) << 16 | 
                     aln.mapq << 8 | (len(aln.qname)+1),
                 aln.flag << 16 | len(aln.cigar),
                 seq_len,
